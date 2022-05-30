@@ -1,7 +1,8 @@
 use role securityadmin;
+
 --Finance Analysts
 create user if not exists Adam
-    password = <choose_a_password>
+    password = SnowflakeHOL22
     login_name = Adam
     display_name = 'Adam'
     first_name = 'Adam'
@@ -10,7 +11,7 @@ create user if not exists Adam
     default_warehouse = finance_wh;
 
 create user if not exists Jenna
-    password = <choose_a_password>
+    password = SnowflakeHOL22
     login_name = Jenna
     display_name = 'Jenna'
     first_name = 'Jenna'
@@ -19,7 +20,7 @@ create user if not exists Jenna
     default_warehouse = finance_wh;
 
 create user if not exists Anand
-    password = <choose_a_password>
+    password = SnowflakeHOL22
     login_name = Anand
     display_name = 'Anand'
     first_name = 'Anand'
@@ -29,7 +30,7 @@ create user if not exists Anand
 
 --Finance Admin
 create user if not exists Dan
-    password = <choose_a_password>
+    password = SnowflakeHOL22
     login_name = Dan
     display_name = 'Dan'
     first_name = 'Dan'
@@ -38,7 +39,7 @@ create user if not exists Dan
     default_warehouse = finance_wh;
 
 create user if not exists Sachin
-    password = <choose_a_password>
+    password = SnowflakeHOL22
     login_name = Sachin
     display_name = 'Sachin'
     first_name = 'Sachin'
@@ -47,7 +48,7 @@ create user if not exists Sachin
     default_warehouse = finance_wh;
 
 create user if not exists Aaron
-    password = <choose_a_password>
+    password = SnowflakeHOL22
     login_name = Aaron
     display_name = 'Aaron'
     first_name = 'Aaron'
@@ -57,7 +58,7 @@ create user if not exists Aaron
 
 --Sales Analyst
 create user if not exists Alex
-    password = <choose_a_password>
+    password = SnowflakeHOL22
     login_name = Alex
     display_name = 'Alex'
     first_name = 'Alex'
@@ -66,7 +67,7 @@ create user if not exists Alex
     default_warehouse = sales_wh;
 
 create user if not exists Brett
-    password = <choose_a_password>
+    password = SnowflakeHOL22
     login_name = Brett
     display_name = 'Brett'
     first_name = 'Brett'
@@ -75,7 +76,7 @@ create user if not exists Brett
     default_warehouse = sales_wh;
 
 create user if not exists Brian
-    password = <choose_a_password>
+    password = SnowflakeHOL22
     login_name = Brian
     display_name = 'Brian'
     first_name = 'Brian'
@@ -85,7 +86,7 @@ create user if not exists Brian
 
 --Sales Admin
 create user if not exists Caroline
-    password = <choose_a_password>
+    password = SnowflakeHOL22
     login_name = Caroline
     display_name = 'Caroline'
     first_name = 'Caroline'
@@ -94,7 +95,7 @@ create user if not exists Caroline
     default_warehouse = sales_wh;
 
 create user if not exists Dinesh
-    password = <choose_a_password>
+    password = SnowflakeHOL22
     login_name = Dinesh
     display_name = 'Dinesh'
     first_name = 'Dinesh'
@@ -103,7 +104,7 @@ create user if not exists Dinesh
     default_warehouse = sales_wh;
 
 create user if not exists Diana
-    password = <choose_a_password>
+    password = SnowflakeHOL22
     login_name = Diana
     display_name = 'Diana'
     first_name = 'Diana'
@@ -113,7 +114,7 @@ create user if not exists Diana
 
 --Marketing Analyst
 create user if not exists Divya
-    password = <choose_a_password>
+    password = SnowflakeHOL22
     login_name = Divya
     display_name = 'Divya'
     first_name = 'Divya'
@@ -122,7 +123,7 @@ create user if not exists Divya
     default_warehouse = bi_reporting_wh;
 
 create user if not exists Emma
-    password = <choose_a_password>
+    password = SnowflakeHOL22
     login_name = Emma
     display_name = 'Emma'
     first_name = 'Emma'
@@ -131,7 +132,7 @@ create user if not exists Emma
     default_warehouse = bi_reporting_wh;
 
 create user if not exists Grace
-    password = <choose_a_password>
+    password = SnowflakeHOL22
     login_name = Grace
     display_name = 'Grace'
     first_name = 'Grace'
@@ -141,7 +142,7 @@ create user if not exists Grace
 
 --Marketing Admin
 create user if not exists Irina
-    password = <choose_a_password>
+    password = SnowflakeHOL22
     login_name = Irina
     display_name = 'Irina'
     first_name = 'Irina'
@@ -150,7 +151,7 @@ create user if not exists Irina
     default_warehouse = bi_reporting_wh;
     
 create user if not exists Jack
-    password = <choose_a_password>
+    password = SnowflakeHOL22
     login_name = Jack
     display_name = 'Jack'
     first_name = 'Jack'
@@ -159,7 +160,7 @@ create user if not exists Jack
     default_warehouse = bi_reporting_wh;
     
 create user if not exists Justin
-    password = <choose_a_password>
+    password = SnowflakeHOL22
     login_name = Justin
     display_name = 'Justin'
     first_name = 'Justin'
@@ -169,7 +170,7 @@ create user if not exists Justin
 
 --HR Analyst
 create user if not exists Zack
-    password = <choose_a_password>
+    password = SnowflakeHOL22
     login_name = Zack
     display_name = 'Zack'
     first_name = 'Zack'
@@ -178,7 +179,7 @@ create user if not exists Zack
     default_warehouse = hr_wh;
     
 create user if not exists Frank
-    password = <choose_a_password>
+    password = SnowflakeHOL22
     login_name = Frank
     display_name = 'Frank'
     first_name = 'Frank'
@@ -187,7 +188,7 @@ create user if not exists Frank
     default_warehouse = hr_wh;
     
 create user if not exists Praveen
-    password = <choose_a_password>
+    password = SnowflakeHOL22
     login_name = Praveen
     display_name = 'Praveen'
     first_name = 'Praveen'
@@ -197,7 +198,7 @@ create user if not exists Praveen
 
 --HR Admin
 create user if not exists David
-    password = <choose_a_password>
+    password = SnowflakeHOL22
     login_name = David
     display_name = 'David'
     first_name = 'David'
@@ -206,7 +207,7 @@ create user if not exists David
     default_warehouse = hr_wh;
 
 create user if not exists Prasanna
-    password = <choose_a_password>
+    password = SnowflakeHOL22
     login_name = Prasanna
     display_name = 'Prasanna'
     first_name = 'Prasanna'
@@ -215,7 +216,7 @@ create user if not exists Prasanna
     default_warehouse = hr_wh;
 
 create user if not exists Padmaja
-    password = <choose_a_password>
+    password = SnowflakeHOL22
     login_name = Padmaja
     display_name = 'Padmaja'
     first_name = 'Padmaja'
@@ -223,3 +224,16 @@ create user if not exists Padmaja
     default_role = hr_admin
     default_warehouse = hr_wh;
 
+-- Failover Detection User
+create user if not exists "snowflake_ha_tester" 
+    PASSWORD = '*****************' 
+    LOGIN_NAME = 'snowflake_ha_tester' 
+    DISPLAY_NAME = 'snowflake_ha_tester' 
+    FIRST_NAME = 'snowflake_ha_tester' 
+    LAST_NAME = 'snowflake_ha_tester' 
+    EMAIL = 'snowflake_ha_tester@acme.com' 
+    DEFAULT_ROLE = "ACCOUNTADMIN" 
+    DEFAULT_WAREHOUSE = 'snowflake_ha_monitor_1_wh' 
+    MUST_CHANGE_PASSWORD = false;
+
+grant role accountadmin TO user "snowflake_ha_tester";

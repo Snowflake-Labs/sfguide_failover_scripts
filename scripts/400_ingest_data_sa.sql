@@ -24,7 +24,6 @@ create table if not exists payroll.noam_northeast.employee_detail (
    ,company varchar
 );
 
-
 create file format if not exists common.utility.csv_standard
     type = csv
     field_delimiter = ','
@@ -33,13 +32,16 @@ create file format if not exists common.utility.csv_standard
     empty_field_as_null = true
     compression = gzip;
 
-use schema global_sales.online_retail;
-use warehouse etl_wh;
-
 use schema payroll.noam_northeast;
 use warehouse etl_wh;
 
+-- Download this file from the GitHub repo and issue the put command from SnowSQL
+--   specify warehouse and schema as above
 put file:///Users/pparashar/Downloads/hr_data_sample.csv @%employee_detail;
+
+copy into employee_detail
+    from @%employee_detail
+    file_format = (format_name = common.utility.csv_standard);
 
 -- Create storage integration, which is an account-level object, which we will use to create an external stage and table.
 use role accountadmin;
@@ -53,24 +55,7 @@ create storage integration if not exists s3click_int
 --We'll create other objects using sysadmin, so grant "usage" privilege on this storage integration to role sysadmin.
 grant usage on integration s3click_int to role sysadmin;
 
---Create an external stage
 use role sysadmin;
-create file format if not exists external_db.public.parquet_format 
-    type = parquet 
-    trim_space = true;
-
-create stage if not exists external_db.public.click_stream_stage 
-    storage_integration = s3click_int
-    url = 's3://sfc-demo-data/click-stream-data/processed/date=2019-05-17/'
-    file_format = external_db.public.parquet_format;
-
---Ensure that you can list files in the stage
---list @click_stream_stage;
-
-copy into employee_detail
-    from @%employee_detail
-    file_format = (format_name = common.utility.csv_standard);
-
 
 alter warehouse etl_wh set warehouse_size='X-Large';
 
@@ -85,8 +70,6 @@ create table if not exists global_sales.online_retail.supplier as select * from 
 
 update global_sales.online_retail.orders set o_orderdate=dateadd(day,-1,current_date()) 
     where o_orderdate=(select max(o_orderdate) from global_sales.online_retail.orders);
-
-alter warehouse etl_wh set warehouse_size='X-Small';
 
 create table if not exists common.utility.mkt_segment_mapping (
       sales_role varchar(30),
@@ -106,18 +89,230 @@ create secure materialized view if not exists global_sales.online_retail.part_co
     from 
     global_sales.online_retail.part
     group by p_container;
-                                
-use role accountadmin;
-create share if not exists global_sales_share;
+
+
+-- Create objects with cross-database dependencies
+-- (use SNOWFLAKE_SAMPLE_DATA shared database)
+
+create or replace share global_sales_share;
 grant usage on database global_sales to share global_sales_share;
 grant usage on schema global_sales.online_retail to share global_sales_share;
 grant select on table global_sales.online_retail.customer to share global_sales_share;
 grant select on table global_sales.online_retail.lineitem to share global_sales_share;
 grant select on table global_sales.online_retail.nation to share global_sales_share;
 
--- EXTERNAL DB contains an external table 
 
---Failing on GCP Primary with because storage type different from cloud provider.
+create database if not exists snowflake_sample_data from share sfc_samples.sample_data;
+grant imported privileges on database snowflake_sample_data to public;
+
+-- REFERENCES DB defines a masking policy, row-access policy, and tags.
+create or replace database references;
+create or replace schema references.lookups;
+create or replace table lookups.household_demographics as
+  select * from snowflake_sample_data.tpcds_sf10tcl.household_demographics;
+create or replace table lookups.time_dim as
+  select * from snowflake_sample_data.tpcds_sf10tcl.time_dim;
+create or replace table lookups.store as
+  select * from snowflake_sample_data.tpcds_sf10tcl.store;
+create or replace schema references.policies;
+create or replace masking policy references.policies.name_mask as (val string) returns string ->
+  case
+    when current_role() in ('MANAGER') then val
+    when invoker_share() in ('CROSS_DATABASE_SHARE') then val
+    else '**********'
+  end;
+create or replace row access policy references.policies.rap_item_history as (limit_date date) returns boolean ->
+  case
+    when current_role() in ('MANAGER') then true
+    when year(limit_date) < 2000 then true
+    else false
+  end;
+alter table references.lookups.store modify column s_manager set masking policy references.policies.name_mask;
+create or replace schema references.tags;
+create tag if not exists references.tags.gender;
+create tag if not exists references.tags.owner;
+
+alter warehouse bi_reporting_wh set tag references.tags.owner = 'labrunner';
+alter warehouse etl_wh set tag references.tags.owner = 'labloader';
+
+-- SALES DB has tables that are periodically updated
+create or replace database sales;
+use database sales;
+create or replace table store_sales as select * from snowflake_sample_data.tpcds_sf10tcl.store_sales sample (3000 rows);
+create or replace table web_sales as select * from snowflake_sample_data.tpcds_sf10tcl.web_sales sample (3000 rows);
+create or replace table catalog_sales as select * from snowflake_sample_data.tpcds_sf10tcl.catalog_sales sample (3000 rows);
+alter table store_sales add column ss_last_update_time timestamp;
+update store_sales set ss_last_update_time = current_timestamp();
+alter table web_sales add column ws_last_update_time timestamp;
+update web_sales set ws_last_update_time = current_timestamp();
+alter table catalog_sales add column cs_last_update_time timestamp;
+update catalog_sales set cs_last_update_time = current_timestamp();
+create or replace secure view total_sales (sold_date_sk, item_sk, quantity, last_update_time) as
+ with sales_union (date_sk, item_sk, quant, last_update) as 
+ (
+ select ss_sold_date_sk, ss_item_sk, ss_quantity, ss_last_update_time from store_sales union
+ select ws_sold_date_sk, ws_item_sk, ws_quantity, ws_last_update_time from web_sales union
+ select cs_sold_date_sk, cs_item_sk, cs_quantity, cs_last_update_time from catalog_sales
+ )
+ select * from sales_union order by last_update desc;
+
+-- CRM DB has a secure MV and tags on CUSTOMER_DEMOGRAPHICS
+create or replace database crm;
+create or replace table customer as select * from snowflake_sample_data.tpcds_sf10tcl.customer sample (1000 rows);
+create or replace table customer_address as select * from snowflake_sample_data.tpcds_sf10tcl.customer_address sample (1000 rows);
+create or replace table customer_demographics as select * from snowflake_sample_data.tpcds_sf10tcl.customer_demographics sample (1000 rows);
+alter table customer_demographics modify column cd_gender set tag references.tags.gender = 'verified';
+create or replace secure materialized view customers_by_state (state, customer_count) as
+  select ca_state, count(*) 
+  from crm.public.customer_address
+  group by 1;
+
+-- PRODUCTS DB has a row access policy on ITEM and a secure UDF
+create or replace database products;
+create or replace schema internal;
+create or replace table internal.inventory as 
+  select * from snowflake_sample_data.tpcds_sf10tcl.inventory sample (1000 rows);
+create or replace table public.item as 
+  select * from snowflake_sample_data.tpcds_sf10tcl.item;
+alter table public.item add row access policy references.policies.rap_item_history on (i_rec_start_date);
+
+create or replace secure function products.internal.item_quantity()
+returns table(item_id varchar, product_name varchar, quantity number)
+as 'select i_item_id, i_product_name, inv_quantity_on_hand 
+    from products.internal.inventory
+    join products.public.item on inv_item_sk = i_item_sk
+    '
+;
+-- select * from table(products.internal.item_quantity());
+
+-- CROSS_DATABASE DB contains a secure view that has a dependency on SALES, REFERENCES
+create or replace database cross_database;
+create or replace table cross_database..income_band as 
+  select * from snowflake_sample_data.tpcds_sf10tcl.income_band;
+create or replace secure view cross_database..morning_sales (num_stores, lead_manager, num_employees) as 
+select count(*), any_value(s_manager), median(s_number_employees)
+from sales.public.store_sales
+    ,references.lookups.household_demographics
+    ,references.lookups.time_dim, references.lookups.store
+where ss_sold_time_sk = time_dim.t_time_sk
+    and ss_hdemo_sk = household_demographics.hd_demo_sk
+    and ss_store_sk = s_store_sk
+    and time_dim.t_hour < 12
+order by count(*);
+
+-- EXTERNALS DB contains an external table 
+create or replace database externals;
+create or replace table externals.public.promotions as 
+  select * from snowflake_sample_data.tpcds_sf10tcl.promotion;
+create or replace file format externals.public.parquet_format type = parquet trim_space = true;
+create or replace stage externals.public.click_stream_stage storage_integration = s3click_int
+  url = 's3://sfc-demo-data/click-stream-data/processed/date=2019-05-17/'
+  file_format = externals.public.parquet_format;
+list @click_stream_stage;
+
+--Fails on GCP Primary with because storage type different from cloud provider.
 /*create external table if not exists external_db.public.clickstream_ext
   location = @external_db.public.click_stream_stage
   file_format = external_db.public.parquet_format;*/
+
+create or replace external table externals.public.clickstream_ext
+  location = @externals.public.click_stream_stage
+  file_format = externals.public.parquet_format;
+  
+describe external table externals.public.clickstream_ext;
+select * from externals.public.clickstream_ext limit 10;
+
+alter warehouse etl_wh set warehouse_size='X-Small';
+
+-- Setup SHARES with various characteristics
+
+-- SALES_HISTORY_SHARE: all objects contained in SALES DB
+create or replace share sales_history_share;
+grant usage on database sales to share sales_history_share;
+grant usage on schema sales.public to share sales_history_share;
+grant select on view sales.public.total_sales to share sales_history_share;
+
+-- CRM_SHARE: REFERENCE_USAGE on REFERENCES for tag on CUSTOMER_DEMOGRAPHICS
+create or replace share crm_share;
+grant usage on database crm to share crm_share;
+grant usage on schema crm.public to share crm_share;
+grant select on all tables in schema crm.public to share crm_share;
+grant reference_usage on database references to share crm_share;
+grant select on view crm.public.customers_by_state to share crm_share;
+
+-- INVENTORY_SHARE: REFERENCE_USAGE on REFERENCES for row-access policy on ITEM
+create or replace share inventory_share;
+grant usage on database products to share inventory_share;
+grant usage on schema products.internal to share inventory_share;
+grant usage on schema products.public to share inventory_share;
+grant reference_usage on database references to share inventory_share;
+grant usage on function products.internal.item_quantity() to share inventory_share;
+
+-- CROSS_DATABASE_SHARE: view MORNING_SALES references tables in SALES, REFERENCES
+create or replace share cross_database_share;
+grant usage on database cross_database to share cross_database_share;
+grant usage on schema cross_database.public to share cross_database_share;
+grant reference_usage on database sales to share cross_database_share;
+grant reference_usage on database references to share cross_database_share;
+grant select on view cross_database.public.morning_sales to share cross_database_share;
+
+
+-- SQL Stored Proc to modify sales tables
+create or replace procedure sales..update_sales()
+returns varchar
+language sql
+as
+-- add the "$$" delimiter if running in classic UI
+-- $$ 
+begin
+  insert into sales..store_sales select *, current_timestamp() 
+    from snowflake_sample_data.tpcds_sf10tcl.store_sales sample (100 rows);
+  insert into sales..web_sales select *, current_timestamp() 
+    from snowflake_sample_data.tpcds_sf10tcl.web_sales sample (100 rows);
+  insert into sales..catalog_sales select *, current_timestamp() 
+    from snowflake_sample_data.tpcds_sf10tcl.catalog_sales sample (100 rows);
+
+  update sales..store_sales set ss_quantity = (store_sales.ss_quantity + abs(random()%100)) 
+    where  minute(ss_last_update_time) > (minute(current_timestamp())-3);
+  update sales..web_sales set ws_quantity = (web_sales.ws_quantity + abs(random()%100)) 
+    where  minute(ws_last_update_time) > (minute(current_timestamp())-3);
+  update sales..catalog_sales set cs_quantity = (catalog_sales.cs_quantity + abs(random()%100)) 
+    where  minute(cs_last_update_time) > (minute(current_timestamp())-3);
+
+  insert into references.lookups.household_demographics 
+    select * from snowflake_sample_data.tpcds_sf10tcl.household_demographics sample (5 rows);
+  insert into crm..customer 
+    select * from snowflake_sample_data.tpcds_sf10tcl.customer sample (5 rows);
+  insert into products..item 
+    select * from snowflake_sample_data.tpcds_sf10tcl.item sample (5 rows);
+  insert into cross_database..income_band 
+    select * from snowflake_sample_data.tpcds_sf10tcl.income_band sample (5 rows);
+  
+  commit;
+
+  return('Done!');
+end;
+-- $$
+-- ;
+
+-- Account Failover objects
+--
+create or replace database snowflake_ha_monitor;
+use schema snowflake_ha_monitor.public;
+create or replace table snowflake_ha_monitor_event (last_test_ts timestamp_ltz);
+
+-- Canary Query that verifies account liveness
+create or replace procedure snowflake_ha_monitor_sp()
+returns string
+language javascript
+as
+$$
+// truncate table before inserting a new timestamp
+snowflake.execute({sqlText: "truncate snowflake_ha_monitor_event"});
+// insert a new timestamp into the event table
+snowflake.execute({sqlText: "insert into snowflake_ha_monitor_event values (current_timestamp)"});
+// select the newly inserted row
+snowflake.execute({sqlText: "select * from snowflake_ha_monitor_event"});
+return "Success";
+$$
+;

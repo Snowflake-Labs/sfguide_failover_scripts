@@ -82,11 +82,17 @@ grant apply masking policy on account to role governance_admin;
 grant apply row access policy on account to role governance_admin;
 grant apply tag on account to role governance_admin;
 
+-- Share creation privilege for sysadmin
+grant create share on account to role sysadmin;
+grant import share on account to role sysadmin;
+
 ----------------------Create Personas------------------
 use role securityadmin;
-grant role product_manager to user pparashar;
-grant role data_science to user pparashar;
-grant role governance_admin to user pparashar;
+
+-- REPLACE with your username
+grant role product_manager to user REPLACEME;
+grant role data_science to user REPLACEME;
+grant role governance_admin to user REPLACEME;
 
 grant role finance_analyst to user Adam;
 grant role finance_analyst to user Jenna;

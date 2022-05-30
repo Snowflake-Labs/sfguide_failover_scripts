@@ -29,6 +29,7 @@ grant role data_science to role sysadmin;
 grant role governance_admin to role sysadmin;
 
 use role sysadmin;
+
 create database if not exists global_sales;
 create database if not exists inventory;
 create database if not exists loyalty;
@@ -39,7 +40,6 @@ create database if not exists stores;
 create database if not exists suppliers;
 create database if not exists support;
 create database if not exists web_logs;
-create database if not exists external_db;
 create schema if not exists common.utility;
 create schema if not exists global_sales.online_retail;
 create schema if not exists payroll.noam_northeast;
@@ -104,8 +104,14 @@ create warehouse if not exists sandbox_wh
     initially_suspended = true
     auto_suspend = 180;
 
---Create resource monitors and apply to WHs that require credit monitoring.
+create warehouse if not exists nowflake_ha_monitor_1_wh with warehouse_size = 'xsmall' 
+    auto_suspend = 10800 auto_resume = true min_cluster_count = 1 max_cluster_count = 1 scaling_policy = 'standard';
+create warehouse if not exists snowflake_ha_monitor_2_wh with warehouse_size = 'xsmall' 
+    auto_suspend = 60 auto_resume = true min_cluster_count = 1 max_cluster_count = 1 scaling_policy = 'standard';
+
 use role accountadmin;
+
+--Create resource monitors and apply to WHs that require credit monitoring.
 create resource monitor if not exists toplimit with credit_quota=300
     frequency = monthly
     start_timestamp = immediately
@@ -117,7 +123,5 @@ create resource monitor if not exists dailylimit with credit_quota=100
     triggers on 75 percent do notify
              on 100 percent do suspend;
 
-
 alter warehouse finance_wh set resource_monitor = dailylimit;
 alter warehouse bi_reporting_wh set resource_monitor = dailylimit;
-
