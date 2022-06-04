@@ -104,7 +104,7 @@ create warehouse if not exists sandbox_wh
     initially_suspended = true
     auto_suspend = 180;
 
-create warehouse if not exists nowflake_ha_monitor_1_wh with warehouse_size = 'xsmall' 
+create warehouse if not exists snowflake_ha_monitor_1_wh with warehouse_size = 'xsmall' 
     auto_suspend = 10800 auto_resume = true min_cluster_count = 1 max_cluster_count = 1 scaling_policy = 'standard';
 create warehouse if not exists snowflake_ha_monitor_2_wh with warehouse_size = 'xsmall' 
     auto_suspend = 60 auto_resume = true min_cluster_count = 1 max_cluster_count = 1 scaling_policy = 'standard';
