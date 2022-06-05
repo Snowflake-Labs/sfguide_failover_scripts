@@ -18,6 +18,7 @@ CREATE OR REPLACE TASK REFERENCES..UPDATESALES
 AS
     CALL sales..update_sales();
 
+use role accountadmin;
 ALTER TASK REFERENCES..UPDATESALES RESUME;
 
 select name, database_name, state, scheduled_time, completed_time
