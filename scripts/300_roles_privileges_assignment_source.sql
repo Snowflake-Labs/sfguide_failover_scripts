@@ -76,6 +76,13 @@ grant create masking policy on schema common.utility to role governance_admin;
 grant create row access policy on schema common.utility to role governance_admin;
 grant create tag on schema common.utility to role governance_admin;
 
+grant usage,modify,create schema on database sales to role product_manager;
+grant usage,create table,create view on schema sales.public to role product_manager;
+grant select on all tables in schema sales.public to role product_manager;
+grant select on future tables in schema sales.public to role product_manager;
+grant select on all views in schema sales.public to role product_manager;
+grant select on future views in schema sales.public to role product_manager;
+
 --Account level grants for gov admin
 use role accountadmin;
 grant apply masking policy on account to role governance_admin;
