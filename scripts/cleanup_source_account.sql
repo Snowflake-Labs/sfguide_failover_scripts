@@ -4,7 +4,7 @@
 ---
 -----------------------------------------------------------------------------------------
 
-use role sysadmin;
+use role accountadmin;
 
 -- first drop all shares
 drop share if exists global_sales_share;
@@ -13,6 +13,7 @@ drop share if exists crm_share;
 drop share if exists inventory_share;
 drop share if exists cross_database_share;
 
+use role sysadmin;
 -- now drop all databases
 drop database if exists crm cascade;
 drop database if exists cross_database cascade;
