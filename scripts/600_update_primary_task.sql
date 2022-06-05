@@ -19,6 +19,9 @@ AS
     CALL sales..update_sales();
 
 use role accountadmin;
+--sysadmin will need account level privilege EXECUTE TASK to be able to run/resume.
+grant execute task on account to role sysadmin;
+use role sysadmin;
 ALTER TASK REFERENCES..UPDATESALES RESUME;
 
 select name, database_name, state, scheduled_time, completed_time
