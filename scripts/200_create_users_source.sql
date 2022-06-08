@@ -226,7 +226,7 @@ create user if not exists Padmaja
 
 -- Failover Detection User
 create user if not exists "snowflake_ha_tester" 
-    PASSWORD = '*****************' 
+    PASSWORD = SnowflakeHOL22 
     LOGIN_NAME = 'snowflake_ha_tester' 
     DISPLAY_NAME = 'snowflake_ha_tester' 
     FIRST_NAME = 'snowflake_ha_tester' 
