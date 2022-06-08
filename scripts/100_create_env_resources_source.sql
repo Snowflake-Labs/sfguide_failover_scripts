@@ -40,9 +40,15 @@ create database if not exists stores;
 create database if not exists suppliers;
 create database if not exists support;
 create database if not exists web_logs;
+create database if not exists sales;
+create database if not exists crm;
+create database if not exists products;
+create database if not exists cross_database;
+create database if not exists externals;
 create schema if not exists common.utility;
 create schema if not exists global_sales.online_retail;
 create schema if not exists payroll.noam_northeast;
+create schema if not exists products.internal;
 
 create warehouse if not exists accounting_wh
     warehouse_size = 'x-small'
