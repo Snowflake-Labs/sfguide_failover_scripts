@@ -35,14 +35,6 @@ create file format if not exists common.utility.csv_standard
 use schema payroll.noam_northeast;
 use warehouse etl_wh;
 
--- Download this file from the GitHub repo and issue the put command from SnowSQL
---   specify warehouse and schema as above
--- put file:///Users/pparashar/Downloads/hr_data_sample.csv @%employee_detail;
-
--- copy into employee_detail
---    from @%employee_detail
---    file_format = (format_name = common.utility.csv_standard);
-
 -- Create storage integration, which is an account-level object, which we will use to create an external stage and table.
 use role accountadmin;
 create storage integration if not exists s3click_int
@@ -101,9 +93,6 @@ grant select on table global_sales.online_retail.customer to share global_sales_
 grant select on table global_sales.online_retail.lineitem to share global_sales_share;
 grant select on table global_sales.online_retail.nation to share global_sales_share;
 
-
-create database if not exists snowflake_sample_data from share sfc_samples.sample_data;
-grant imported privileges on database snowflake_sample_data to public;
 
 -- REFERENCES DB defines a masking policy, row-access policy, and tags.
 create or replace database references;
