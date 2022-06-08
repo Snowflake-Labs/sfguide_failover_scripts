@@ -37,11 +37,11 @@ use warehouse etl_wh;
 
 -- Download this file from the GitHub repo and issue the put command from SnowSQL
 --   specify warehouse and schema as above
-put file:///Users/pparashar/Downloads/hr_data_sample.csv @%employee_detail;
+-- put file:///Users/pparashar/Downloads/hr_data_sample.csv @%employee_detail;
 
-copy into employee_detail
-    from @%employee_detail
-    file_format = (format_name = common.utility.csv_standard);
+-- copy into employee_detail
+--    from @%employee_detail
+--    file_format = (format_name = common.utility.csv_standard);
 
 -- Create storage integration, which is an account-level object, which we will use to create an external stage and table.
 use role accountadmin;
@@ -136,7 +136,7 @@ alter warehouse bi_reporting_wh set tag references.tags.owner = 'labrunner';
 alter warehouse etl_wh set tag references.tags.owner = 'labloader';
 
 -- SALES DB has tables that are periodically updated
-create or replace database sales;
+
 use database sales;
 create or replace table store_sales as select * from snowflake_sample_data.tpcds_sf10tcl.store_sales sample (3000 rows);
 create or replace table web_sales as select * from snowflake_sample_data.tpcds_sf10tcl.web_sales sample (3000 rows);
@@ -157,7 +157,8 @@ create or replace secure view total_sales (sold_date_sk, item_sk, quantity, last
  select * from sales_union order by last_update desc;
 
 -- CRM DB has a secure MV and tags on CUSTOMER_DEMOGRAPHICS
-create or replace database crm;
+
+use database crm;
 create or replace table customer as select * from snowflake_sample_data.tpcds_sf10tcl.customer sample (1000 rows);
 create or replace table customer_address as select * from snowflake_sample_data.tpcds_sf10tcl.customer_address sample (1000 rows);
 create or replace table customer_demographics as select * from snowflake_sample_data.tpcds_sf10tcl.customer_demographics sample (1000 rows);
@@ -168,11 +169,11 @@ create or replace secure materialized view customers_by_state (state, customer_c
   group by 1;
 
 -- PRODUCTS DB has a row access policy on ITEM and a secure UDF
-create or replace database products;
-create or replace schema internal;
-create or replace table internal.inventory as 
+
+
+create or replace table products.internal.inventory as 
   select * from snowflake_sample_data.tpcds_sf10tcl.inventory sample (1000 rows);
-create or replace table public.item as 
+create or replace table products.public.item as 
   select * from snowflake_sample_data.tpcds_sf10tcl.item;
 alter table public.item add row access policy references.policies.rap_item_history on (i_rec_start_date);
 
@@ -186,7 +187,7 @@ as 'select i_item_id, i_product_name, inv_quantity_on_hand
 -- select * from table(products.internal.item_quantity());
 
 -- CROSS_DATABASE DB contains a secure view that has a dependency on SALES, REFERENCES
-create or replace database cross_database;
+
 create or replace table cross_database..income_band as 
   select * from snowflake_sample_data.tpcds_sf10tcl.income_band;
 create or replace secure view cross_database..morning_sales (num_stores, lead_manager, num_employees) as 
@@ -201,7 +202,7 @@ where ss_sold_time_sk = time_dim.t_time_sk
 order by count(*);
 
 -- EXTERNALS DB contains an external table 
-create or replace database externals;
+
 create or replace table externals.public.promotions as 
   select * from snowflake_sample_data.tpcds_sf10tcl.promotion;
 create or replace file format externals.public.parquet_format type = parquet trim_space = true;
