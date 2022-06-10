@@ -32,7 +32,6 @@ create file format if not exists common.utility.csv_standard
     empty_field_as_null = true
     compression = gzip;
 
-use schema payroll.noam_northeast;
 use warehouse etl_wh;
 
 -- Create storage integration, which is an account-level object, which we will use to create an external stage and table.
