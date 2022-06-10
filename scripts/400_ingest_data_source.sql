@@ -163,7 +163,7 @@ create or replace table products.internal.inventory as
   select * from snowflake_sample_data.tpcds_sf10tcl.inventory sample (1000 rows);
 create or replace table products.public.item as 
   select * from snowflake_sample_data.tpcds_sf10tcl.item;
-alter table public.item add row access policy references.policies.rap_item_history on (i_rec_start_date);
+alter table products.public.item add row access policy references.policies.rap_item_history on (i_rec_start_date);
 
 create or replace secure function products.internal.item_quantity()
 returns table(item_id varchar, product_name varchar, quantity number)
@@ -197,7 +197,7 @@ create or replace file format externals.public.parquet_format type = parquet tri
 create or replace stage externals.public.click_stream_stage storage_integration = s3click_int
   url = 's3://sfc-demo-data/click-stream-data/processed/date=2019-05-17/'
   file_format = externals.public.parquet_format;
-list @click_stream_stage;
+list @externals.public.click_stream_stage;
 
 --Fails on GCP Primary with because storage type different from cloud provider.
 /*create external table if not exists external_db.public.clickstream_ext
