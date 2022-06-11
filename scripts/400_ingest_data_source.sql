@@ -94,15 +94,12 @@ grant select on table global_sales.online_retail.nation to share global_sales_sh
 
 
 -- REFERENCES DB defines a masking policy, row-access policy, and tags.
-create or replace database references;
-create or replace schema references.lookups;
 create or replace table lookups.household_demographics as
   select * from snowflake_sample_data.tpcds_sf10tcl.household_demographics;
 create or replace table lookups.time_dim as
   select * from snowflake_sample_data.tpcds_sf10tcl.time_dim;
 create or replace table lookups.store as
   select * from snowflake_sample_data.tpcds_sf10tcl.store;
-create or replace schema references.policies;
 create or replace masking policy references.policies.name_mask as (val string) returns string ->
   case
     when current_role() in ('MANAGER') then val
@@ -116,7 +113,6 @@ create or replace row access policy references.policies.rap_item_history as (lim
     else false
   end;
 alter table references.lookups.store modify column s_manager set masking policy references.policies.name_mask;
-create or replace schema references.tags;
 create tag if not exists references.tags.gender;
 create tag if not exists references.tags.owner;
 
@@ -287,7 +283,6 @@ end;
 
 -- Account Failover objects
 --
-create or replace database snowflake_ha_monitor;
 use schema snowflake_ha_monitor.public;
 create or replace table snowflake_ha_monitor_event (last_test_ts timestamp_ltz);
 
