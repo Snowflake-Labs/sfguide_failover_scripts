@@ -158,7 +158,6 @@ create or replace secure materialized view customers_by_state (state, customer_c
 
 -- PRODUCTS DB has a row access policy on ITEM and a secure UDF
 
-
 create or replace table products.internal.inventory as 
   select * from snowflake_sample_data.tpcds_sf10tcl.inventory sample (1000 rows);
 create or replace table products.public.item as 
@@ -197,6 +196,8 @@ create or replace file format externals.public.parquet_format type = parquet tri
 create or replace stage externals.public.click_stream_stage storage_integration = s3click_int
   url = 's3://sfc-demo-data/click-stream-data/processed/date=2019-05-17/'
   file_format = externals.public.parquet_format;
+  
+use database externals;
 list @externals.public.click_stream_stage;
 
 --Fails on GCP Primary with because storage type different from cloud provider.
@@ -217,7 +218,7 @@ alter warehouse etl_wh set warehouse_size='X-Small';
 
 -- SALES_HISTORY_SHARE: all objects contained in SALES DB
 create or replace share sales_history_share;
-grant usage on database sales to share sales_history_share;
+grant usage on sales to share sales_history_share;
 grant usage on schema sales.public to share sales_history_share;
 grant select on view sales.public.total_sales to share sales_history_share;
 
