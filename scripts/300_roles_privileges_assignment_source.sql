@@ -1,3 +1,7 @@
+-----------------------------------------------------------
+-- Please replace the username REPLACEME with your username
+-----------------------------------------------------------
+
 use role securityadmin;
 
 grant usage,operate on warehouse finance_wh to role finance_analyst;
