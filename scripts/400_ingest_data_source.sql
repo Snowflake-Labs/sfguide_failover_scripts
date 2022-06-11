@@ -94,30 +94,33 @@ grant select on table global_sales.online_retail.nation to share global_sales_sh
 
 
 -- REFERENCES DB defines a masking policy, row-access policy, and tags.
+
+use database references;
 create or replace table lookups.household_demographics as
   select * from snowflake_sample_data.tpcds_sf10tcl.household_demographics;
 create or replace table lookups.time_dim as
   select * from snowflake_sample_data.tpcds_sf10tcl.time_dim;
 create or replace table lookups.store as
   select * from snowflake_sample_data.tpcds_sf10tcl.store;
-create or replace masking policy references.policies.name_mask as (val string) returns string ->
+create masking policy if not exists policies.name_mask as (val string) returns string ->
   case
     when current_role() in ('MANAGER') then val
     when invoker_share() in ('CROSS_DATABASE_SHARE') then val
     else '**********'
   end;
-create or replace row access policy references.policies.rap_item_history as (limit_date date) returns boolean ->
+create row access policy if not exists policies.rap_item_history as (limit_date date) returns boolean ->
   case
     when current_role() in ('MANAGER') then true
     when year(limit_date) < 2000 then true
     else false
   end;
-alter table references.lookups.store modify column s_manager set masking policy references.policies.name_mask;
-create tag if not exists references.tags.gender;
-create tag if not exists references.tags.owner;
+alter table lookups.store modify column s_manager set masking policy references.policies.name_mask;
+create tag if not exists tags.gender;
+create tag if not exists tags.owner;
 
 alter warehouse bi_reporting_wh set tag references.tags.owner = 'labrunner';
 alter warehouse etl_wh set tag references.tags.owner = 'labloader';
+
 
 -- SALES DB has tables that are periodically updated
 
@@ -140,6 +143,7 @@ create or replace secure view total_sales (sold_date_sk, item_sk, quantity, last
  )
  select * from sales_union order by last_update desc;
 
+
 -- CRM DB has a secure MV and tags on CUSTOMER_DEMOGRAPHICS
 
 use database crm;
@@ -152,8 +156,10 @@ create or replace secure materialized view customers_by_state (state, customer_c
   from crm.public.customer_address
   group by 1;
 
+
 -- PRODUCTS DB has a row access policy on ITEM and a secure UDF
 
+use database products;
 create or replace table products.internal.inventory as 
   select * from snowflake_sample_data.tpcds_sf10tcl.inventory sample (1000 rows);
 create or replace table products.public.item as 
@@ -167,10 +173,11 @@ as 'select i_item_id, i_product_name, inv_quantity_on_hand
     join products.public.item on inv_item_sk = i_item_sk
     '
 ;
--- select * from table(products.internal.item_quantity());
+
 
 -- CROSS_DATABASE DB contains a secure view that has a dependency on SALES, REFERENCES
 
+use database cross_database;
 create or replace table cross_database..income_band as 
   select * from snowflake_sample_data.tpcds_sf10tcl.income_band;
 create or replace secure view cross_database..morning_sales (num_stores, lead_manager, num_employees) as 
@@ -184,17 +191,18 @@ where ss_sold_time_sk = time_dim.t_time_sk
     and time_dim.t_hour < 12
 order by count(*);
 
+
 -- EXTERNALS DB contains an external table 
 
-create or replace table externals.public.promotions as 
+use database externals;
+create or replace table promotions as 
   select * from snowflake_sample_data.tpcds_sf10tcl.promotion;
-create or replace file format externals.public.parquet_format type = parquet trim_space = true;
-create or replace stage externals.public.click_stream_stage storage_integration = s3click_int
+create or replace file format parquet_format type = parquet trim_space = true;
+create or replace stage click_stream_stage storage_integration = s3click_int
   url = 's3://sfc-demo-data/click-stream-data/processed/date=2019-05-17/'
   file_format = externals.public.parquet_format;
-  
-use database externals;
-list @externals.public.click_stream_stage;
+
+list @public.click_stream_stage;
 
 --Fails on GCP Primary with because storage type different from cloud provider.
 /*create external table if not exists external_db.public.clickstream_ext
@@ -214,7 +222,7 @@ alter warehouse etl_wh set warehouse_size='X-Small';
 
 -- SALES_HISTORY_SHARE: all objects contained in SALES DB
 create or replace share sales_history_share;
-grant usage on sales to share sales_history_share;
+grant usage on database sales to share sales_history_share;
 grant usage on schema sales.public to share sales_history_share;
 grant select on view sales.public.total_sales to share sales_history_share;
 
