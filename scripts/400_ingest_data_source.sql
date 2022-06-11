@@ -93,7 +93,7 @@ grant select on table global_sales.online_retail.lineitem to share global_sales_
 grant select on table global_sales.online_retail.nation to share global_sales_share;
 
 
--- REFERENCES DB defines a masking policy, row-access policy, and tags.
+-- REFERENCES DB contains a masking policy, row-access policy, and tags.
 
 use database references;
 create or replace table lookups.household_demographics as
@@ -102,24 +102,6 @@ create or replace table lookups.time_dim as
   select * from snowflake_sample_data.tpcds_sf10tcl.time_dim;
 create or replace table lookups.store as
   select * from snowflake_sample_data.tpcds_sf10tcl.store;
-create masking policy if not exists policies.name_mask as (val string) returns string ->
-  case
-    when current_role() in ('MANAGER') then val
-    when invoker_share() in ('CROSS_DATABASE_SHARE') then val
-    else '**********'
-  end;
-create row access policy if not exists policies.rap_item_history as (limit_date date) returns boolean ->
-  case
-    when current_role() in ('MANAGER') then true
-    when year(limit_date) < 2000 then true
-    else false
-  end;
-alter table lookups.store modify column s_manager set masking policy references.policies.name_mask;
-create tag if not exists tags.gender;
-create tag if not exists tags.owner;
-
-alter warehouse bi_reporting_wh set tag references.tags.owner = 'labrunner';
-alter warehouse etl_wh set tag references.tags.owner = 'labloader';
 
 
 -- SALES DB has tables that are periodically updated
@@ -150,7 +132,6 @@ use database crm;
 create or replace table customer as select * from snowflake_sample_data.tpcds_sf10tcl.customer sample (1000 rows);
 create or replace table customer_address as select * from snowflake_sample_data.tpcds_sf10tcl.customer_address sample (1000 rows);
 create or replace table customer_demographics as select * from snowflake_sample_data.tpcds_sf10tcl.customer_demographics sample (1000 rows);
-alter table customer_demographics modify column cd_gender set tag references.tags.gender = 'verified';
 create or replace secure materialized view customers_by_state (state, customer_count) as
   select ca_state, count(*) 
   from crm.public.customer_address
@@ -164,7 +145,6 @@ create or replace table products.internal.inventory as
   select * from snowflake_sample_data.tpcds_sf10tcl.inventory sample (1000 rows);
 create or replace table products.public.item as 
   select * from snowflake_sample_data.tpcds_sf10tcl.item;
-alter table products.public.item add row access policy references.policies.rap_item_history on (i_rec_start_date);
 
 create or replace secure function products.internal.item_quantity()
 returns table(item_id varchar, product_name varchar, quantity number)
