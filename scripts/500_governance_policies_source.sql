@@ -2,6 +2,8 @@
 use role governance_admin;
 create tag if not exists common.utility.cost_center allowed_values 'accounting','IT','Marketing','HR'; 
 create tag if not exists common.utility.security_classification allowed_values 'sensitive','confidential','public';
+create tag if not exists references.tags.gender allowed_values 'male','female','non-binary', 'trans','unknown';
+create tag if not exists references.tags.owner;
 
 alter table payroll.noam_northeast.employee_detail set tag common.utility.cost_center='HR';
 alter table payroll.noam_northeast.employee_detail modify column email set tag common.utility.security_classification = 'sensitive';
@@ -58,4 +60,22 @@ create row access policy if not exists common.utility.mkt_segment_rls_policy as 
 
 alter table global_sales.online_retail.customer add row access policy common.utility.mkt_segment_rls_policy on (c_mktsegment);
 
+create masking policy if not exists references.policies.name_mask as (val string) returns string ->
+  case
+    when current_role() in ('PRODUCT_MANAGER') then val
+    when invoker_share() in ('CROSS_DATABASE_SHARE') then val
+    else '**********'
+  end;
+create row access policy if not exists references.policies.rap_item_history as (limit_date date) returns boolean ->
+  case
+    when current_role() in ('PRODUCT_MANAGER') then true
+    when year(limit_date) < 2000 then true
+    else false
+  end;
 
+alter table references.lookups.store modify column s_manager set masking policy references.policies.name_mask;
+alter table products.public.item add row access policy references.policies.rap_item_history on (i_rec_start_date);
+alter table customer_demographics modify column cd_gender set tag references.tags.gender = 'unknown';
+
+alter warehouse bi_reporting_wh set tag references.tags.owner = 'labrunner';
+alter warehouse etl_wh set tag references.tags.owner = 'non-binary';
