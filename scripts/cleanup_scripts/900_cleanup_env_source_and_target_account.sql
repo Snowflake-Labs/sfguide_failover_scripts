@@ -98,3 +98,19 @@ drop user if exists David;
 drop user if exists Prasanna;
 drop user if exists Padmaja;
 drop user if exists "snowflake_ha_tester";
+
+drop warehouse if exists accounting_wh;
+drop warehouse if exists analytics_wh;
+drop warehouse if exists etl_wh;
+drop warehouse if exists bi_reporting_wh;
+drop warehouse if exists finance_wh;
+drop warehouse if exists hr_wh;
+drop warehouse if exists it_wh;
+drop warehouse if exists data_science_wh;
+drop warehouse if exists product_wh;
+drop warehouse if exists sales_wh;
+drop warehouse if exists ops_support_wh;
+drop warehouse if exists sandbox_wh;
+drop warehouse if exists snowflake_ha_monitor_1_wh;
+drop warehouse if exists snowflake_ha_monitor_2_wh;
+
