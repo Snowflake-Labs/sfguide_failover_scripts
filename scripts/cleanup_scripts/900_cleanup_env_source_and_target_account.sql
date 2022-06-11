@@ -33,7 +33,6 @@ drop database if exists support cascade;
 drop database if exists web_logs cascade;
 drop database if exists snowflake_ha_monitor cascade;
 
-use role sysadmin;
 drop warehouse if exists load_wh;
 drop warehouse if exists query_wh;
 drop warehouse if exists sales_wh;
@@ -97,19 +96,3 @@ drop resource monitor if exists toplimit;
 drop resource monitor if exists dailylimit;
 
 drop storage integration if exists s3click_int;
-
-drop warehouse if exists accounting_wh;
-drop warehouse if exists analytics_wh;
-drop warehouse if exists etl_wh;
-drop warehouse if exists bi_reporting_wh;
-drop warehouse if exists finance_wh;
-drop warehouse if exists hr_wh;
-drop warehouse if exists it_wh;
-drop warehouse if exists data_science_wh;
-drop warehouse if exists product_wh;
-drop warehouse if exists sales_wh;
-drop warehouse if exists ops_support_wh;
-drop warehouse if exists sandbox_wh;
-drop warehouse if exists snowflake_ha_monitor_1_wh;
-drop warehouse if exists snowflake_ha_monitor_2_wh;
-
