@@ -33,10 +33,6 @@ drop database if exists support cascade;
 drop database if exists web_logs cascade;
 drop database if exists snowflake_ha_monitor cascade;
 
-
-use role accountadmin;
-drop storage integration if exists s3click_int;
-
 use role sysadmin;
 drop warehouse if exists load_wh;
 drop warehouse if exists query_wh;
@@ -55,9 +51,6 @@ drop warehouse if exists ops_support_wh;
 drop warehouse if exists sandbox_wh;
 drop warehouse if exists snowflake_ha_monitor_1_wh;
 drop warehouse if exists snowflake_ha_monitor_2_wh;
-
-drop resource monitor if exists toplimit;
-drop resource monitor if exists dailylimit;
 
 use role securityadmin;
 drop role if exists product_manager;
@@ -98,6 +91,12 @@ drop user if exists David;
 drop user if exists Prasanna;
 drop user if exists Padmaja;
 drop user if exists "snowflake_ha_tester";
+
+use role accountadmin;
+drop resource monitor if exists toplimit;
+drop resource monitor if exists dailylimit;
+
+drop storage integration if exists s3click_int;
 
 drop warehouse if exists accounting_wh;
 drop warehouse if exists analytics_wh;
