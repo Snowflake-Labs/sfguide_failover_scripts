@@ -80,6 +80,13 @@ grant create masking policy on schema common.utility to role governance_admin;
 grant create row access policy on schema common.utility to role governance_admin;
 grant create tag on schema common.utility to role governance_admin;
 
+grant usage,modify,create schema on database references to role governance_admin;
+grant usage,create table,create view on schema references.tags to role governance_admin;
+grant usage,create table,create view on schema references.policies to role governance_admin;
+grant create masking policy on schema references.policies to role governance_admin;
+grant create row access policy on schema references.policies to role governance_admin;
+grant create tag on schema references.tags to role governance_admin;
+
 grant usage,modify,create schema on database sales to role product_manager;
 grant usage,create table,create view on schema sales.public to role product_manager;
 grant select on all tables in schema sales.public to role product_manager;
