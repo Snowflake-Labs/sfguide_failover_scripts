@@ -1,4 +1,4 @@
-#Run this on both source and target account
+-- Run this on both source and target account
 -----------------------------------------------------------------------------------------
 ---
 --- CLEANUP_SOURCE_AND_TARGET_ACCOUNT
