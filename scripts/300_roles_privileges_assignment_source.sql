@@ -1,6 +1,6 @@
------------------------------------------------------------
--- Please replace the username REPLACEME with your username
------------------------------------------------------------
+--------------------------------------------------------------
+-- Please replace the username INSTRUCTOR with your username
+--------------------------------------------------------------
 
 use role securityadmin;
 
@@ -108,9 +108,9 @@ grant import share on account to role sysadmin;
 use role securityadmin;
 
 -- REPLACE with your username
-grant role product_manager to user REPLACEME;
-grant role data_science to user REPLACEME;
-grant role governance_admin to user REPLACEME;
+grant role product_manager to user INSTRUCTOR;
+grant role data_science to user INSTRUCTOR;
+grant role governance_admin to user INSTRUCTOR;
 
 grant role finance_analyst to user Adam;
 grant role finance_analyst to user Jenna;
