@@ -10,8 +10,6 @@
 use role sysadmin;
 use warehouse it_wh;
 
--- ALTER TASK REFERENCES..UPDATESALES SUSPEND;
-
 CREATE OR REPLACE TASK REFERENCES..UPDATESALES
     WAREHOUSE = etl_wh
     SCHEDULE = '3 minute'
@@ -21,9 +19,14 @@ AS
 use role accountadmin;
 --sysadmin will need account level privilege EXECUTE TASK to be able to run/resume.
 grant execute task on account to role sysadmin;
+
 use role sysadmin;
 ALTER TASK REFERENCES..UPDATESALES RESUME;
 
 select name, database_name, state, scheduled_time, completed_time
   from table(references.information_schema.task_history())
   order by scheduled_time desc;
+  
+-- SUSPEND to avoid running up credits
+-- RESUME this task after starting a FAILOVER GROUP scheduled replication
+ALTER TASK REFERENCES..UPDATESALES SUSPEND;
