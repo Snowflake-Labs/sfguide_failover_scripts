@@ -28,6 +28,10 @@ grant usage on all schemas in database inventory to role sales_analyst;
 grant usage on future schemas in database global_sales to role sales_analyst;
 grant usage on future schemas in database inventory to role sales_analyst;
 grant select on future tables in schema global_sales.online_retail to role sales_analyst;
+grant usage on database sales to role sales_analyst;
+grant usage on schema sales.public to role sales_analyst;
+grant select on all tables in schema sales.public to role sales_analyst;
+grant select on future tables in schema sales.public to role sales_analyst;
 
 grant usage,modify on warehouse sales_wh to role sales_admin;
 grant usage,modify,create schema on database global_sales to role sales_admin;
