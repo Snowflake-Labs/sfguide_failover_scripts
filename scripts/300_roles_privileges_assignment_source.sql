@@ -32,6 +32,8 @@ grant usage on database sales to role sales_analyst;
 grant usage on schema sales.public to role sales_analyst;
 grant select on all tables in schema sales.public to role sales_analyst;
 grant select on future tables in schema sales.public to role sales_analyst;
+grant select on all views in schema sales.public to role sales_analyst;
+grant select on future views in schema sales.public to role sales_analyst;
 
 grant usage,modify on warehouse sales_wh to role sales_admin;
 grant usage,modify,create schema on database global_sales to role sales_admin;
