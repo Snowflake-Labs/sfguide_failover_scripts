@@ -93,7 +93,6 @@ drop user if exists Padmaja;
 drop user if exists "snowflake_ha_tester";
 
 use role accountadmin;
-drop resource monitor if exists toplimit;
 drop resource monitor if exists dailylimit;
 
-drop storage integration if exists s3click_int;
+drop storage integration if exists s3_pipeline_int;
