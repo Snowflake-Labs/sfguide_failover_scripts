@@ -1,18 +1,16 @@
-#!/usr/bin/env python
 import snowflake.connector
 import streamlit as st
 import pandas as pd
 import streamlit_echarts as ste
 import json
 
-# Gets the version
+# Snowflake connection details
 ctx = snowflake.connector.connect(
-    user=<user_name>,
-    password=<password>,
-    #account name value should be that of connection_url from the show connections command. Everything before snowflakecomputing.com
-    account=<account_name>,
+    user='FILL_IN_USERNAME',
+    password='FILL_IN_PASSWORD',
+    account='ORGNAME-CONNECTION',
     session_parameters={
-        'QUERY_TAG': 'Snowflake Summit 2022: Failover HoL'
+        'QUERY_TAG': 'Business Continuity Hands-On-Lab'
     },
     warehouse='bi_reporting_wh',
     database='global_sales',
@@ -24,14 +22,14 @@ cur = ctx.cursor()
 
 #Query to power streamlit app
 app_sql = """
-select round(sum(o_totalprice)/1000,2) as value, 
-       lower(c_mktsegment) as name 
-       from 
-       global_sales.online_retail.orders 
-       inner join global_sales.online_retail.customer 
-       on c_custkey = o_custkey 
-       where o_orderdate between dateadd(day,-4,current_date) and current_date() 
-       group by 2 
+select round(sum(o_totalprice)/1000,2) as value,
+       lower(c_mktsegment) as name
+       from
+       global_sales.online_retail.orders
+       inner join global_sales.online_retail.customer
+       on c_custkey = o_custkey
+       where o_orderdate between dateadd(day,-4,current_date) and current_date()
+       group by 2
        order by 1 desc;
 """
 #Query to get account name.
@@ -141,21 +139,20 @@ st.sidebar.markdown(update_title,unsafe_allow_html=True)
 st.sidebar.markdown(update_time_value,unsafe_allow_html=True)
 
 overview_text = """
-This dashboard will help demonstrate revenue share per market segment 
-as of yesterday. It is additionally highlighting information about the 
-Snowflake deployment that is powering the pie-chart visualization, 
-observe the name and region of your snowflake account. We will now 
-stimulate a failover scenario by promoting our secondary account to 
-primary and observe seamless failover while our ever so important data 
-apps such as this continue to be powered by Snowflake, not just on a 
-completely new region but also on a different cloud provider as well.   
+This dashboard will help demonstrate revenue share per market segment
+as of yesterday. It is additionally highlighting information about the
+Snowflake deployment that is powering the pie-chart visualization,
+observe the name and region of your snowflake account. We will now
+stimulate a failover scenario by promoting our secondary account to
+primary and observe seamless failover while our ever so important data
+apps such as this continue to be powered by Snowflake, not just on a
+completely new region but also on a different cloud provider as well.
 """
 conclusion_text = """
-Congratulations, on achieving cross-cloud cross-region 
-replication in a matter of minutes. Remember, what happens in vegas doesn't 
-necessarily need to stay in Vegas. Now go out, share this useful spear of 
-knowledge that you now have in your quiver and go make your org resilient 
-to region failures. 
+Congratulations, on achieving cross-cloud cross-region replication 
+in a matter of minutes! Now go out, share this useful spear of knowledge
+that you now have in your quiver and go make your organization resilient
+to cloud region failures.
 """
 st.button("Refresh")
 st.title("Snowflake + Streamlit")

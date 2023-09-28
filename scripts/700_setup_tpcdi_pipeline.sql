@@ -17,14 +17,14 @@ CREATE OR REPLACE FILE FORMAT TPCDI_STG.BASE.TXT_FIXED_WIDTH TYPE = CSV COMPRESS
 -- Create external stage
 USE SCHEMA TPCDI_STG.BASE;
 
-CREATE OR REPLACE STAGE TPCDI_EXTERNAL
+CREATE OR REPLACE STAGE TPCDI_STG.BASE.TPCDI_EXTERNAL
 URL = 's3://sfc-demo-data-public/cross-cloud-business-continuity-quickstart/tpcdi-scale100'
 STORAGE_INTEGRATION = S3_PIPELINE_INT;
 
 list @tpcdi_stg.base.tpcdi_external;
 
 -- Create internal stage 
-CREATE OR REPLACE STAGE TPCDI_FILES
+CREATE OR REPLACE STAGE TPCDI_STG.BASE.TPCDI_FILES
   DIRECTORY = (ENABLE = TRUE);
 
 --
@@ -33,9 +33,9 @@ CREATE OR REPLACE STAGE TPCDI_FILES
 -- snowsql -a myorganization-myaccount -u snowgrid -f /tmp/scripts/snowsql/tpcdi_load.sql -o output_format=csv -o output_file=output_file.csv
 --
 
-ALTER STAGE TPCDI_FILES REFRESH;
+ALTER STAGE TPCDI_STG.BASE.TPCDI_FILES REFRESH;
 
-SELECT * FROM DIRECTORY(@TPCDI_FILES);
+SELECT * FROM DIRECTORY(@TPCDI_STG.BASE.TPCDI_FILES);
 
 -- Create table objects in TPCDI_STG.BASE schema
 CREATE OR REPLACE TABLE TPCDI_STG.BASE.DATE_STG (

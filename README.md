@@ -9,7 +9,6 @@ Dashboard scripts are provided for Streamlit and BI tools.
 
 ## Reading Material
 
-* [Snowflake Summit 2022 Failover Lab slides](https://drive.google.com/file/d/1Owihn8WvNqqWjQf3_FiG36O5GkbisVNq/view?usp=sharing)
-* Public Preview Doc - [Using a Replication Group to replicate shares](https://docs.snowflake.com/en/user-guide/data-share-replication.html)
-* Public Preview Doc - [Using a Failover Group to replicate account objects](https://docs.snowflake.com/en/user-guide/account-replication-failover.html)
-* GA Doc - [Client Redirect](https://docs.snowflake.com/en/user-guide/client-redirect.html)
+- Deck: [Cross-Cloud Business Continuity Hands-On Lab](https://drive.google.com/file/d/15tDG-h6ZtsFSB_iJWPeLxyfQBnL4b5jm/view?usp=drive_link)
+- Docs: [Business Continuity Guide](https://docs.snowflake.com/en/user-guide/replication-intro)
+- Public Preview: [Data Pipeline Replication](https://docs.snowflake.com/en/user-guide/account-replication-stages-pipes-load-history)
