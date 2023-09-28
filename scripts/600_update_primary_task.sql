@@ -12,7 +12,7 @@ use warehouse it_wh;
 
 CREATE OR REPLACE TASK REFERENCES..UPDATESALES
     WAREHOUSE = etl_wh
-    SCHEDULE = '3 minute'
+    SCHEDULE = '1 minute'
 AS
     CALL sales..update_sales();
 
